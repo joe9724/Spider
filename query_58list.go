@@ -5,23 +5,49 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"labix.org/v2/mgo/bson"
 	"labix.org/v2/mgo"
-	"flag"
+	_"flag"
 	"fmt"
+	"github.com/BurntSushi/toml"
+	"flag"
+	"os"
 )
-const URL = "192.168.30.125:27017"
+var MongoUrl string
+var MongoCollection string
 
+type TomConfi struct {
+	Title string
+	Mongodb _Mongodb
+	Log _Log
+	SpiderTarget _SpiderTarget
+}
+type _Mongodb struct {
+	Ip string
+	Port string
+	Username string
+	Password string
+	Database string
+	Collection string
+}
+type _Log struct{
+	Path string
+	FileName string
+}
+type _SpiderTarget struct{
+	Url string
+}
+
+var  config TomConfi
 var (
 	mgoSession *mgo.Session
-	dataBase   = "bus"
+	dataBase   string
 )
-var (
-	logFileName = flag.String("log", "/var/log/spider.log", "Log file name")
-)
+
+
 
 func getSession() *mgo.Session {
 	if mgoSession == nil {
 		var err error
-		mgoSession, err = mgo.Dial(URL)
+		mgoSession, err = mgo.Dial(MongoUrl)
 		if err != nil {
 			panic(err)
 		}
@@ -37,7 +63,7 @@ func witchCollection(collection string, s func(*mgo.Collection) error) error {
 	return s(c)
 }
 func GetJokes(){
-	doc, err := goquery.NewDocument("http://nj.58.com/chuzu/")
+	doc, err := goquery.NewDocument(config.SpiderTarget.Url)
 	if err != nil{
 		log.Fatal(err)
 	}
@@ -50,12 +76,34 @@ func GetJokes(){
 
 			return c.Insert(selector)
 		}
-		witchCollection("pf_58zufang", q_insert)
+		witchCollection(MongoCollection, q_insert)
 	})
 
 
 }
 
 func main(){
+	//init toml config
+        _,err := toml.DecodeFile("config.toml",&config)
+	if(err!=nil){
+		fmt.Println(err.Error())
+		return
+
+	}else{
+		logFileName := flag.String("log", config.Log.Path, config.Log.FileName)
+		dataBase = config.Mongodb.Database
+		MongoUrl = config.Mongodb.Ip+":"+config.Mongodb.Port
+		MongoCollection = config.Mongodb.Collection
+		flag.Parse()
+		logFile, logErr := os.OpenFile(*logFileName, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+		if logErr != nil {
+			fmt.Println("no log file access...exit...")
+			//os.Exit(1)
+		}
+		log.SetOutput(logFile)
+	}
+
+
+
 	GetJokes()
 }

@@ -1,0 +1,17 @@
+# This is a TOML document
+title = "config file"
+
+[mongodb]
+ip = "192.168.30.125"
+port = "27017"
+username = ""
+password = ""
+database = "bus"
+collection = "pf_58zufang"
+
+[log]
+path = "/var/log/spider.log"
+filename = "logfilename"
+
+[spiderTarget]
+url = "http://nj.58.com/chuzu/"
