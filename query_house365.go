@@ -75,6 +75,7 @@ func GetJokes365(){
 		if(!err){
 			return
 		}*/
+		//
 
                 fmt.Println(mahonia.NewDecoder("GB2312").ConvertString(s.Find("a").Text()))
 		q_insert := func(c *mgo.Collection) error {
