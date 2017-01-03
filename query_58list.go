@@ -67,11 +67,16 @@ func GetJokes(){
 	if err != nil{
 		log.Fatal(err)
 	}
-	doc.Find(".des").Each(func(i int, s *goquery.Selection){
-		fmt.Println(s.Html())
+	doc.Find(".listBox .listUl li").Each(func(i int, s *goquery.Selection){
+		//fmt.Println(s.Find(".des .room").Html())
+		doc,err := s.Find(".img_list img").Attr("lazy_src")
+		if(!err){
+			return
+		}
+
 		q_insert := func(c *mgo.Collection) error {
 			selector := bson.M{
-				"html":s.Text(),
+				"html":doc,
 			}
 
 			return c.Insert(selector)
