@@ -7,11 +7,12 @@ port = "27017"
 username = ""
 password = ""
 database = "bus"
-collection = "pf_58zufang"
+collection = "pf_spider"
 
 [log]
 path = "/var/log/spider.log"
 filename = "logfilename"
 
 [spiderTarget]
-url = "http://nj.58.com/chuzu/"
+#url = "http://nj.58.com/chuzu/"
+url = "http://cz.rent.house365.com/district/"

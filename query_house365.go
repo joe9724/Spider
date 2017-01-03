@@ -10,6 +10,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"flag"
 	"os"
+	"github.com/henrylee2cn/pholcus/common/mahonia"
 )
 var MongoUrl string
 var MongoCollection string
@@ -45,7 +46,7 @@ var (
 
 
 
-func getSession() *mgo.Session {
+func getSession365() *mgo.Session {
 	if mgoSession == nil {
 		var err error
 		mgoSession, err = mgo.Dial(MongoUrl)
@@ -57,32 +58,33 @@ func getSession() *mgo.Session {
 	return mgoSession.Clone()
 }
 
-func witchCollection(collection string, s func(*mgo.Collection) error) error {
-	session := getSession()
+func witchCollection365(collection string, s func(*mgo.Collection) error) error {
+	session := getSession365()
 	defer session.Close()
 	c := session.DB(dataBase).C(collection)
 	return s(c)
 }
-func GetJokes(){
+func GetJokes365(){
 	doc, err := goquery.NewDocument(config.SpiderTarget.Url)
 	if err != nil{
 		log.Fatal(err)
 	}
-	doc.Find(".listBox .listUl li").Each(func(i int, s *goquery.Selection){
+	doc.Find(".mainBody .list_con table .list_item").Each(func(i int, s *goquery.Selection){
 		//fmt.Println(s.Find(".des .room").Html())
-		doc,err := s.Find(".img_list img").Attr("lazy_src")
+		/*doc,err := s.Find(".img_list img").Attr("lazy_src")
 		if(!err){
 			return
-		}
+		}*/
 
+                fmt.Println(mahonia.NewDecoder("GB2312").ConvertString(s.Find("a").Text()))
 		q_insert := func(c *mgo.Collection) error {
 			selector := bson.M{
-				"html":doc,
+				"html":mahonia.NewDecoder("GB2312").ConvertString(s.Find("a").Text()),
 			}
 
 			return c.Insert(selector)
 		}
-		witchCollection(MongoCollection, q_insert)
+		witchCollection365(MongoCollection, q_insert)
 	})
 
 
@@ -111,5 +113,5 @@ func main(){
 
 
 
-	GetJokes()
+	GetJokes365()
 }
